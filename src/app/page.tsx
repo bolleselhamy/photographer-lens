@@ -16,7 +16,6 @@ export default function HomePage() {
 
   const toggleLang = () => setLang(prev => prev === 'ar' ? 'en' : 'ar');
 
-  // التحقق من الـ auth callback عند تحميل الصفحة
   useEffect(() => {
     const checkAuthCallback = async () => {
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -28,7 +27,6 @@ export default function HomePage() {
         if (user) {
           const userEmail = user.email?.toLowerCase();
           
-          // التحقق من الأدمن
           const { data: adminData } = await supabase
             .from('admins')
             .select('email')
@@ -40,7 +38,6 @@ export default function HomePage() {
             return;
           }
 
-          // التحقق من المستخدم المعتمد
           const { data: approvedData } = await supabase
             .from('approved_users')
             .select('*')
@@ -53,13 +50,8 @@ export default function HomePage() {
             return;
           }
 
-          // مش معتمد
           await supabase.auth.signOut();
-          setMessage(
-            lang === 'ar' 
-              ? ' حسابك في انتظار الموافقة.' 
-              : '⏳ Your account is pending approval.'
-          );
+          setMessage(lang === 'ar' ? '⏳ حسابك في انتظار الموافقة.' : '⏳ Your account is pending approval.');
           setMessageType('pending');
           window.location.hash = '';
         }
@@ -78,9 +70,7 @@ export default function HomePage() {
     });
     if (error) {
       console.error('Google login error:', error);
-      setMessage(
-        lang === 'ar' ? 'حدث خطأ في تسجيل الدخول.' : 'Login error occurred.'
-      );
+      setMessage(lang === 'ar' ? 'حدث خطأ في تسجيل الدخول.' : 'Login error occurred.');
       setMessageType('error');
     }
   };
@@ -100,7 +90,6 @@ export default function HomePage() {
         return;
       }
 
-      // التحقق من الأدمن
       const { data: adminData } = await supabase
         .from('admins')
         .select('email')
@@ -108,12 +97,9 @@ export default function HomePage() {
         .single();
 
       if (adminData) {
-        setMessage(
-          lang === 'ar' ? '✓ تم إرسال رابط الدخول (أدمن)' : '✓ Admin login link sent'
-        );
+        setMessage(lang === 'ar' ? '✓ تم إرسال رابط الدخول (أدمن)' : '✓ Admin login link sent');
         setMessageType('success');
       } else {
-        // التحقق من المستخدم المعتمد
         const { data: approvedData } = await supabase
           .from('approved_users')
           .select('*')
@@ -122,22 +108,15 @@ export default function HomePage() {
           .single();
 
         if (approvedData) {
-          setMessage(
-            lang === 'ar' ? '✓ تم إرسال رابط الدخول' : '✓ Login link sent'
-          );
+          setMessage(lang === 'ar' ? '✓ تم إرسال رابط الدخول' : '✓ Login link sent');
           setMessageType('success');
         } else {
-          // مش معتمد - إضافة طلب معلق
           await supabase.from('pending_users').upsert(
             [{ email: email.toLowerCase(), status: 'pending' }],
             { onConflict: 'email' }
           );
 
-          setMessage(
-            lang === 'ar' 
-              ? '⏳ تم إرسال طلب الدخول. في انتظار موافقة المدير.' 
-              : '⏳ Access requested. Waiting for admin approval.'
-          );
+          setMessage(lang === 'ar' ? '⏳ تم إرسال طلب الدخول. في انتظار موافقة المدير.' : '⏳ Access requested. Waiting for admin approval.');
           setMessageType('pending');
         }
       }
@@ -151,7 +130,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-      {/* الخلفية مع Blur */}
       <div 
         className="fixed inset-0 z-0"
         style={{
@@ -164,7 +142,6 @@ export default function HomePage() {
       />
       <div className="fixed inset-0 bg-black/70 z-0" />
 
-      {/* زر تغيير اللغة */}
       <button 
         onClick={toggleLang} 
         className="fixed top-4 right-4 z-20 p-2 bg-black/50 backdrop-blur-sm rounded-full hover:bg-black/70 transition-colors border border-white/10"
@@ -172,14 +149,12 @@ export default function HomePage() {
         <Globe className="w-4 h-4 text-white" />
       </button>
 
-      {/* الـ Card الرئيسي */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 w-full max-w-3xl mx-4 shadow-2xl"
       >
         <div className="flex items-center gap-8">
-          {/* الجزء الأيسر: اللوجو والعنوان */}
           <div className="flex-1 text-center">
             <div className="flex justify-center mb-4">
               <div className="w-24 h-24 rounded-full bg-black border-2 border-amber-500/30 flex items-center justify-center overflow-hidden shadow-lg">
@@ -199,12 +174,9 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* الفاصل العمودي */}
           <div className="w-px h-64 bg-white/10"></div>
 
-          {/* الجزء الأيمن: الأزرار والنموذج */}
           <div className="flex-1">
-            {/* زر Google */}
             <button
               onClick={handleGoogleLogin}
               className="w-full flex items-center justify-center gap-3 bg-black hover:bg-gray-900 text-white font-semibold py-3 rounded-xl transition-all mb-4 border border-white/10 hover:border-white/20"
@@ -218,14 +190,12 @@ export default function HomePage() {
               {lang === 'ar' ? 'تسجيل الدخول بـ Google' : 'Sign in with Google'}
             </button>
 
-            {/* الفاصل OR */}
             <div className="flex items-center gap-3 my-4">
               <div className="flex-1 h-px bg-white/10"></div>
               <span className="text-gray-500 text-xs">OR</span>
               <div className="flex-1 h-px bg-white/10"></div>
             </div>
 
-            {/* نموذج الإيميل */}
             <form onSubmit={handleEmailLogin} className="space-y-3">
               <p className="text-gray-400 text-center text-xs">
                 {lang === 'ar' ? 'أدخل إيميلك لطلب إذن الدخول' : 'Enter your email to request access'}
@@ -257,7 +227,6 @@ export default function HomePage() {
               </button>
             </form>
 
-            {/* رسالة النجاح/الخطأ/الانتظار */}
             {message && (
               <motion.p 
                 initial={{ opacity: 0, y: 10 }}
@@ -274,7 +243,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-4 pt-3 border-t border-white/10 text-center">
           <p className="text-gray-600 text-xs">© 2025 Boles Elhamy Photography</p>
         </div>
