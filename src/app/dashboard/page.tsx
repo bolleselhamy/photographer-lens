@@ -72,7 +72,8 @@ const translations = {
     confirmDeleteUser: 'هل أنت متأكد من حذف هذا المستخدم؟',
     email: 'البريد الإلكتروني',
     role: 'الصلاحية',
-    actions: 'الإجراءات'
+    actions: 'الإجراءات',
+    inviteSent: 'تم إرسال الدعوة'
   },
   en: {
     welcome: 'Welcome, Let\'s Create Unforgettable Memories ',
@@ -140,7 +141,8 @@ const translations = {
     confirmDeleteUser: 'Are you sure you want to delete this user?',
     email: 'Email',
     role: 'Role',
-    actions: 'Actions'
+    actions: 'Actions',
+    inviteSent: 'Invite Sent'
   }
 };
 
@@ -322,33 +324,45 @@ export default function DashboardPage() {
     await loadAllUsers();
   };
 
+  // ✅ التعديل الوحيد هنا - إرسال Magic Link للمستخدم الجديد
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUserEmail) return;
 
+    // 1. إضافة في جدول admins لو أدمن
     if (newUserRole === 'admin') {
       await supabase.from('admins').upsert({ email: newUserEmail }, { onConflict: 'email' });
-      await supabase.from('approved_users').upsert([{ 
-        email: newUserEmail, 
-        role: 'admin', 
-        is_active: true, 
-        session_token: generateToken(),
-        approved_at: new Date().toISOString() 
-      }], { onConflict: 'email' });
-    } else {
-      await supabase.from('approved_users').upsert([{ 
-        email: newUserEmail, 
-        role: newUserRole, 
-        is_active: true, 
-        session_token: generateToken(),
-        approved_at: new Date().toISOString() 
-      }], { onConflict: 'email' });
+    }
+    
+    // 2. إضافة في approved_users
+    await supabase.from('approved_users').upsert([{ 
+      email: newUserEmail, 
+      role: newUserRole, 
+      is_active: true, 
+      session_token: generateToken(),
+      approved_at: new Date().toISOString() 
+    }], { onConflict: 'email' });
+
+    // 3. إرسال Magic Link للمستخدم الجديد (هيضيفه في auth.users تلقائياً)
+    const { error } = await supabase.auth.signInWithOtp({ 
+      email: newUserEmail,
+      options: {
+        shouldCreateUser: true,
+      }
+    });
+
+    if (error) {
+      console.error('Error sending invite:', error);
+      alert('فشل إرسال الدعوة. تأكد من صحة الإيميل.');
+      return;
     }
 
     setNewUserEmail('');
     setNewUserRole('viewer');
     setShowUserForm(false);
     await loadAllUsers();
+    
+    alert(`✓ تم إرسال دعوة إلى ${newUserEmail}\nالمستخدم لازم يضغط على الرابط في الإيميل عشان يدخل.`);
   };
 
   const handleEditUser = async (user: any, newRole: 'viewer' | 'editor' | 'admin') => {
