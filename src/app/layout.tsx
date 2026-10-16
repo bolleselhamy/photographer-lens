@@ -1,25 +1,18 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "LENS Photography",
-  description: "Professional Photography Platform",
-  icons: {
-    icon: [
-      { url: '/icon.png', sizes: '32x32' },
-      { url: '/icon.png', sizes: '16x16' },
-    ],
-    apple: '/icon.png',
-  },
+  title: 'Boles Photography',
+  description: 'Professional Photography Platform',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl">
       <head>
         <link rel="icon" href="/icon.png" type="image/png" />
         <link rel="shortcut icon" href="/icon.png" type="image/png" />

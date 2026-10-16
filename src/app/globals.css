@@ -44,7 +44,7 @@ body {
   font-family: 'Cairo', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: all 0.3s ease;
+  min-height: 100vh;
 }
 
 .font-display {
@@ -55,15 +55,26 @@ body {
   font-family: 'Great Vibes', cursive;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
+.text-gold-gradient {
+  background: linear-gradient(135deg, #d4a574 0%, #f0d9a0 50%, #b8935f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
-::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+
+.card-hover {
+  transition: all 0.3s ease;
 }
-::-webkit-scrollbar-thumb {
-  background: var(--accent-dark);
-  border-radius: 3px;
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px rgba(212, 165, 116, 0.1);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 @keyframes fadeIn {
@@ -82,30 +93,4 @@ body {
 
 .animate-slide-in {
   animation: slideIn 0.4s ease forwards;
-}
-
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="light"] .glass {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.text-gold-gradient {
-  background: linear-gradient(135deg, #d4a574 0%, #f0d9a0 50%, #b8935f 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.card-hover {
-  transition: all 0.3s ease;
-}
-.card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 40px rgba(212, 165, 116, 0.1);
 }
