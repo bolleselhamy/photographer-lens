@@ -2,888 +2,540 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { 
-  Home, Calendar, Image as ImageIcon, Download, Bell, User, Headphones, 
-  Plus, X, Copy, ExternalLink, Trash2, Upload, FileImage, FileVideo, 
-  Loader2, CheckCircle2, Phone, MessageCircle, Camera, Shield, 
-  UserCheck, UserX, UserCog, Edit, Save, LogOut, Sun, Moon,
-  Users, ChevronLeft, TrendingUp, Globe, Search, Sparkles
+import {
+  Home, Calendar, Image as ImageIcon, Download, Bell, Plus, X, Copy, ExternalLink,
+  Trash2, Upload, FileImage, FileVideo, Loader2, CheckCircle2, Phone, MessageCircle,
+  Camera, Shield, UserCheck, UserX, UserCog, Edit, Save, LogOut, Sun, Moon, Users,
+  ChevronLeft, TrendingUp, Globe, Folder, User
 } from 'lucide-react';
 
 const InstagramIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
   </svg>
 );
-
 const FacebookIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
   </svg>
 );
 
-const translations: Record<string, Record<string, string>> = {
+const tr: Record<string, Record<string, string>> = {
   ar: {
-    welcome: 'مرحباً بك', welcomeSub: 'لتصفح ذكرياتك',
-    welcomeDesc: 'إليك نظرة عامة على جلساتك، ويمكنك الآن الوصول إلى صورك وتنزيلها بسهولة.',
-    addClient: 'إضافة عميل', createAlbum: 'إنشاء جلسة',
-    totalSessions: 'إجمالي الجلسات', totalPhotos: 'إجمالي الصور',
-    todayDownloads: 'التنزيلات اليوم', downloadAll: 'تحميل الكل',
-    downloadAllSub: '(جلسة محددة)', yourSessions: 'جلساتك',
-    viewAll: 'عرض الكل', noAlbums: 'لا توجد جلسات بعد.',
-    noClients: 'لا يوجد عملاء بعد.', clientName: 'اسم العميل',
-    albumName: 'اسم الجلسة', description: 'الوصف',
-    selectClient: 'اختر العميل', cancel: 'إلغاء', save: 'حفظ',
-    copyLink: 'نسخ الرابط', copied: 'تم النسخ', open: 'فتح',
-    uploadMedia: 'رفع الوسائط', downloadPhotos: 'تحميل الصور',
-    confirmDeleteClient: 'هل أنت متأكد من حذف هذا العميل؟',
-    confirmDeleteAlbum: 'هل أنت متأكد من حذف هذه الجلسة؟',
-    addClientTitle: 'إضافة عميل جديد', createAlbumTitle: 'إنشاء جلسة جديدة',
-    uploadMediaTitle: 'رفع الوسائط', logout: 'تسجيل الخروج',
-    home: 'الرئيسية', mySessions: 'جلساتي', photos: 'الصور',
-    downloads: 'التنزيلات', notifications: 'الإشعارات',
-    profile: 'الملف الشخصي', support: 'الدعم',
-    clients: 'العملاء', albums: 'الألبومات',
-    permissions: 'الصلاحيات', userManagement: 'إدارة المستخدمين',
-    pendingRequests: 'طلبات معلقة', approvedUsers: 'المستخدمون المعتمدون',
-    allUsers: 'جميع المستخدمين', approve: 'موافقة', reject: 'رفض',
-    viewer: 'مشاهد', editor: 'محرر', admin: 'مدير',
-    noPendingRequests: 'لا توجد طلبات معلقة',
-    noApprovedUsers: 'لا يوجد مستخدمون معتمدون', noUsers: 'لا يوجد مستخدمون',
-    addUser: 'إضافة مستخدم', editUser: 'تعديل مستخدم',
-    removeUser: 'إزالة مستخدم', confirmDeleteUser: 'هل أنت متأكد من حذف هذا المستخدم؟',
-    email: 'البريد الإلكتروني', role: 'الصلاحية',
-    photos_count: 'صورة', contactHelp: 'هل تحتاج إلى مساعدة؟',
-    contactDesc: 'تواصل معي لأي استفسار أو دعم فني.',
-    contactWhatsapp: 'تواصل عبر واتساب',
-    photographer: 'Boles Elhamy', weddingLabel: 'جلسة زفاف',
-    portraitLabel: 'جلسة بورتريه', eventLabel: 'مناسبات خاصة',
-    otherLabel: 'أخرى', search: 'بحث...',
-    captureMoments: 'Capture Your Moments',
-    noSessionsYet: 'لا توجد جلسات بعد. أنشئ أول جلسة!',
-    wedding: 'جلسة زفاف', portrait: 'جلسة بورتريه',
-    event: 'مناسبات خاصة', other: 'أخرى',
-    sessionType: 'نوع الجلسة', sessionDate: 'تاريخ الجلسة',
-    selectDate: 'اختر التاريخ', confirmDeleteMedia: 'هل أنت متأكد من حذف هذا الملف؟',
-    noMedia: 'لا توجد ملفات', files: 'ملفات', uploading: 'جاري الرفع...',
-    uploaded: 'تم رفع', uploadComplete: 'اكتمل الرفع!',
-    image: 'صورة', video: 'فيديو'
+    welcome: 'مرحباً بك', welcomeSub: 'لتصفح ذكرياتك', welcomeDesc: 'إليك نظرة عامة على جلساتك، ويمكنك الآن الوصول إلى صورك وتنزيلها بسهولة.',
+    home: 'الرئيسية', clients: 'العملاء', albums: 'الألبومات', permissions: 'الصلاحيات', users: 'إدارة المستخدمين',
+    addClient: 'إضافة عميل', createAlbum: 'إنشاء جلسة', totalSessions: 'إجمالي الجلسات', totalPhotos: 'إجمالي الصور',
+    totalClients: 'إجمالي العملاء', todayDownloads: 'التنزيلات اليوم', yourSessions: 'جلساتك', viewAll: 'عرض الكل',
+    noAlbums: 'لا توجد جلسات بعد. أنشئ أول جلسة!', noClients: 'لا يوجد عملاء بعد.', clientName: 'اسم العميل',
+    albumName: 'اسم الجلسة', description: 'الوصف', selectClient: 'اختر العميل', cancel: 'إلغاء', save: 'حفظ',
+    copyLink: 'نسخ الرابط', copied: 'تم النسخ', open: 'فتح', uploadMedia: 'رفع الوسائط', downloadPhotos: 'تحميل الصور',
+    confirmDel: 'هل أنت متأكد من الحذف؟', logout: 'تسجيل الخروج', photosCount: 'صورة', files: 'ملفات',
+    uploading: 'جاري الرفع...', uploaded: 'تم رفع', uploadComplete: 'اكتمل الرفع!', noMedia: 'لا توجد ملفات',
+    image: 'صورة', video: 'فيديو', pending: 'طلبات معلقة', approved: 'المستخدمون المعتمدون', approve: 'موافقة', reject: 'رفض',
+    viewer: 'مشاهد', editor: 'محرر', admin: 'مدير', noPending: 'لا توجد طلبات معلقة', noApproved: 'لا يوجد مستخدمون معتمدون',
+    noUsers: 'لا يوجد مستخدمون', addUser: 'إضافة مستخدم', email: 'البريد الإلكتروني', help: 'هل تحتاج إلى مساعدة؟',
+    helpDesc: 'تواصل معي لأي استفسار أو دعم فني.', whatsapp: 'تواصل عبر واتساب', photographer: 'Photographer',
+    wedding: 'جلسة زفاف', portrait: 'جلسة بورتريه', event: 'مناسبات خاصة', other: 'أخرى', sessions: 'جلسة', user: 'مستخدم',
+    capture: 'Capture Your Moments', invited: 'تم إرسال دعوة إلى', inviteFail: 'فشل إرسال الدعوة.'
   },
   en: {
-    welcome: 'Welcome', welcomeSub: 'to browse your memories',
-    welcomeDesc: 'Here is an overview of your sessions. You can now access and download your photos easily.',
-    addClient: 'Add Client', createAlbum: 'Create Session',
-    totalSessions: 'Total Sessions', totalPhotos: 'Total Photos',
-    todayDownloads: 'Today\'s Downloads', downloadAll: 'Download All',
-    downloadAllSub: '(Selected Session)', yourSessions: 'Your Sessions',
-    viewAll: 'View All', noAlbums: 'No sessions yet.',
-    noClients: 'No clients yet.', clientName: 'Client Name',
-    albumName: 'Session Name', description: 'Description',
-    selectClient: 'Select Client', cancel: 'Cancel', save: 'Save',
-    copyLink: 'Copy Link', copied: 'Copied', open: 'Open',
-    uploadMedia: 'Upload Media', downloadPhotos: 'Download Photos',
-    confirmDeleteClient: 'Are you sure?', confirmDeleteAlbum: 'Are you sure?',
-    addClientTitle: 'Add New Client', createAlbumTitle: 'Create New Session',
-    uploadMediaTitle: 'Upload Media', logout: 'Logout',
-    home: 'Home', mySessions: 'My Sessions', photos: 'Photos',
-    downloads: 'Downloads', notifications: 'Notifications',
-    profile: 'Profile', support: 'Support',
-    clients: 'Clients', albums: 'Albums',
-    permissions: 'Permissions', userManagement: 'User Management',
-    pendingRequests: 'Pending Requests', approvedUsers: 'Approved Users',
-    allUsers: 'All Users', approve: 'Approve', reject: 'Reject',
-    viewer: 'Viewer', editor: 'Editor', admin: 'Admin',
-    noPendingRequests: 'No pending requests',
-    noApprovedUsers: 'No approved users', noUsers: 'No users',
-    addUser: 'Add User', editUser: 'Edit User',
-    removeUser: 'Remove User', confirmDeleteUser: 'Are you sure?',
-    email: 'Email', role: 'Role',
-    photos_count: 'photos', contactHelp: 'Need Help?',
-    contactDesc: 'Contact me for any inquiry.',
-    contactWhatsapp: 'Contact via WhatsApp',
-    photographer: 'Boles Elhamy', weddingLabel: 'Wedding Session',
-    portraitLabel: 'Portrait Session', eventLabel: 'Special Events',
-    otherLabel: 'Other', search: 'Search...',
-    captureMoments: 'Capture Your Moments',
-    noSessionsYet: 'No sessions yet. Create your first one!',
-    wedding: 'Wedding Session', portrait: 'Portrait Session',
-    event: 'Special Events', other: 'Other',
-    sessionType: 'Session Type', sessionDate: 'Session Date',
-    selectDate: 'Select date', confirmDeleteMedia: 'Are you sure?',
-    noMedia: 'No files', files: 'files', uploading: 'Uploading...',
-    uploaded: 'Uploaded', uploadComplete: 'Upload Complete!',
-    image: 'Image', video: 'Video'
+    welcome: 'Welcome', welcomeSub: 'to browse your memories', welcomeDesc: 'Here is an overview of your sessions. You can now access and download your photos easily.',
+    home: 'Home', clients: 'Clients', albums: 'Albums', permissions: 'Permissions', users: 'User Management',
+    addClient: 'Add Client', createAlbum: 'Create Session', totalSessions: 'Total Sessions', totalPhotos: 'Total Photos',
+    totalClients: 'Total Clients', todayDownloads: "Today's Downloads", yourSessions: 'Your Sessions', viewAll: 'View All',
+    noAlbums: 'No sessions yet. Create your first one!', noClients: 'No clients yet.', clientName: 'Client Name',
+    albumName: 'Session Name', description: 'Description', selectClient: 'Select Client', cancel: 'Cancel', save: 'Save',
+    copyLink: 'Copy Link', copied: 'Copied', open: 'Open', uploadMedia: 'Upload Media', downloadPhotos: 'Download Photos',
+    confirmDel: 'Are you sure you want to delete?', logout: 'Logout', photosCount: 'photos', files: 'files',
+    uploading: 'Uploading...', uploaded: 'Uploaded', uploadComplete: 'Upload Complete!', noMedia: 'No files',
+    image: 'Image', video: 'Video', pending: 'Pending Requests', approved: 'Approved Users', approve: 'Approve', reject: 'Reject',
+    viewer: 'Viewer', editor: 'Editor', admin: 'Admin', noPending: 'No pending requests', noApproved: 'No approved users',
+    noUsers: 'No users', addUser: 'Add User', email: 'Email', help: 'Need Help?',
+    helpDesc: 'Contact me for any inquiry.', whatsapp: 'Contact via WhatsApp', photographer: 'Photographer',
+    wedding: 'Wedding Session', portrait: 'Portrait Session', event: 'Special Events', other: 'Other', sessions: 'sessions', user: 'users',
+    capture: 'Capture Your Moments', invited: 'Invitation sent to', inviteFail: 'Failed to send invitation.'
   }
 };
 
-const generateToken = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-type ActiveTab = 'home' | 'sessions' | 'photos' | 'downloads' | 'notifications' | 'profile' | 'support' | 'clients' | 'albums' | 'permissions' | 'users';
+const genToken = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+type Tab = 'home' | 'clients' | 'albums' | 'permissions' | 'users';
+type Role = 'viewer' | 'editor' | 'admin';
 
 export default function DashboardPage() {
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const toggleLang = () => setLang(prev => prev === 'ar' ? 'en' : 'ar');
+  const t = (k: string) => tr[lang][k] || k;
+  const rtl = lang === 'ar';
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
+    const n = theme === 'dark' ? 'light' : 'dark';
+    setTheme(n);
+    document.documentElement.setAttribute('data-theme', n);
   };
-  const t = (key: string): string => translations[lang][key] || key;
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>('home');
+  const [tab, setTab] = useState<Tab>('home');
   const [loading, setLoading] = useState(true);
-  const [showClientForm, setShowClientForm] = useState(false);
-  const [showAlbumForm, setShowAlbumForm] = useState(false);
-  const [showManageForm, setShowManageForm] = useState(false);
-  const [showUserForm, setShowUserForm] = useState(false);
-  const [editingUser, setEditingUser] = useState<any>(null);
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserRole, setNewUserRole] = useState<'viewer' | 'editor' | 'admin'>('viewer');
-  const [managingAlbum, setManagingAlbum] = useState<any>(null);
-  const [selectedClient, setSelectedClient] = useState<any>(null);
-  const [clientName, setClientName] = useState('');
-  const [albumName, setAlbumName] = useState('');
-  const [albumDescription, setAlbumDescription] = useState('');
-  const [sessionType, setSessionType] = useState('wedding');
-  const [sessionDate, setSessionDate] = useState('');
+  const [userRole, setUserRole] = useState<Role>('viewer');
+  const [email, setEmail] = useState('');
   const [clients, setClients] = useState<any[]>([]);
   const [albums, setAlbums] = useState<any[]>([]);
-  const [albumMedia, setAlbumMedia] = useState<any[]>([]);
-  const [albumCounts, setAlbumCounts] = useState<Record<string, number>>({});
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [totalUploadFiles, setTotalUploadFiles] = useState(0);
-  const [uploadedFiles, setUploadedFiles] = useState(0);
-  const [uploadComplete, setUploadComplete] = useState(false);
-  const [userRole, setUserRole] = useState<'admin' | 'viewer' | 'editor'>('viewer');
+  const [counts, setCounts] = useState<Record<string, number>>({});
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [approvedUsers, setApprovedUsers] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
-  const [currentUserEmail, setCurrentUserEmail] = useState('');
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [pendingUploadAlbum, setPendingUploadAlbum] = useState<any>(null);
+  const [showClient, setShowClient] = useState(false);
+  const [showAlbum, setShowAlbum] = useState(false);
+  const [showUser, setShowUser] = useState(false);
+  const [showManage, setShowManage] = useState(false);
+  const [clientName, setClientName] = useState('');
+  const [albumName, setAlbumName] = useState('');
+  const [albumDesc, setAlbumDesc] = useState('');
+  const [sessionType, setSessionType] = useState('wedding');
+  const [sessionDate, setSessionDate] = useState('');
+  const [selClient, setSelClient] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newRole, setNewRole] = useState<Role>('viewer');
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [managing, setManaging] = useState<any>(null);
+  const [media, setMedia] = useState<any[]>([]);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [uploadedN, setUploadedN] = useState(0);
+  const [uploadDone, setUploadDone] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const pendingAlbum = useRef<any>(null);
+
+  useEffect(() => { document.documentElement.setAttribute('data-theme', 'dark'); }, []);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, []);
-
-  useEffect(() => {
-    const checkUser = async () => {
+    const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUserEmail(user.email || '');
-        const userEmail = user.email?.toLowerCase();
-        const adminEmail = 'popbop202@gmail.com';
-
-        if (userEmail === adminEmail) {
-          setUserRole('admin');
-          await supabase.from('admins').upsert({ email: userEmail }, { onConflict: 'email' });
-          await loadData();
-          setLoading(false);
-          return;
-        }
-
-        const { data: adminData } = await supabase.from('admins').select('email').ilike('email', userEmail || '').single();
-        if (adminData) { setUserRole('admin'); await loadData(); setLoading(false); return; }
-
-        const { data: approvedData } = await supabase.from('approved_users').select('*').ilike('email', userEmail || '').eq('is_active', true).single();
-        if (approvedData) {
-          setUserRole(approvedData.role);
-          if (approvedData.role !== 'admin') { window.location.href = '/client'; return; }
-          await loadData(); setLoading(false); return;
-        }
-
-        await supabase.auth.signOut();
-        window.location.href = '/';
-      } else { window.location.href = '/'; }
-      setLoading(false);
+      if (!user) { window.location.href = '/'; return; }
+      const e = (user.email || '').toLowerCase();
+      setEmail(e);
+      if (e === 'popbop202@gmail.com') {
+        setUserRole('admin');
+        await supabase.from('admins').upsert({ email: e }, { onConflict: 'email' });
+        await loadData(); setLoading(false); return;
+      }
+      const { data: a } = await supabase.from('admins').select('email').ilike('email', e).single();
+      if (a) { setUserRole('admin'); await loadData(); setLoading(false); return; }
+      const { data: ap } = await supabase.from('approved_users').select('*').ilike('email', e).eq('is_active', true).single();
+      if (ap) {
+        if (ap.role !== 'admin') { window.location.href = '/client'; return; }
+        setUserRole('admin'); await loadData(); setLoading(false); return;
+      }
+      await supabase.auth.signOut();
+      window.location.href = '/';
     };
-    checkUser();
+    init();
   }, []);
 
   const loadData = async () => {
-    const { data: clientsData } = await supabase.from('clients').select('*').order('created_at', { ascending: false });
-    if (clientsData) setClients(clientsData);
-    const { data: albumsData } = await supabase.from('albums').select('*, clients(name)').order('created_at', { ascending: false });
-    if (albumsData) {
-      setAlbums(albumsData);
-      const counts: Record<string, number> = {};
-      for (const album of albumsData) {
-        const { count } = await supabase.from('media').select('*', { count: 'exact', head: true }).eq('album_id', album.id);
-        counts[album.id] = count || 0;
+    const { data: c } = await supabase.from('clients').select('*').order('created_at', { ascending: false });
+    if (c) setClients(c);
+    const { data: a } = await supabase.from('albums').select('*, clients(name)').order('created_at', { ascending: false });
+    if (a) {
+      setAlbums(a);
+      const m: Record<string, number> = {};
+      for (const al of a) {
+        const { count } = await supabase.from('media').select('*', { count: 'exact', head: true }).eq('album_id', al.id);
+        m[al.id] = count || 0;
       }
-      setAlbumCounts(counts);
+      setCounts(m);
     }
-    await loadPermissions();
-    await loadAllUsers();
+    await loadPerms(); await loadAllUsers();
   };
-
-  const loadPermissions = async () => {
-    const { data: pending } = await supabase.from('pending_users').select('*').eq('status', 'pending').order('created_at', { ascending: false });
-    if (pending) setPendingUsers(pending);
-    const { data: approved } = await supabase.from('approved_users').select('*').order('created_at', { ascending: false });
-    if (approved) setApprovedUsers(approved);
+  const loadPerms = async () => {
+    const { data: p } = await supabase.from('pending_users').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+    if (p) setPendingUsers(p);
+    const { data: a } = await supabase.from('approved_users').select('*').order('created_at', { ascending: false });
+    if (a) setApprovedUsers(a);
   };
-
   const loadAllUsers = async () => {
     const { data: admins } = await supabase.from('admins').select('*').order('created_at', { ascending: false });
     const { data: approved } = await supabase.from('approved_users').select('*').order('created_at', { ascending: false });
-    const adminEmails = new Set(admins?.map((a: any) => a.email.toLowerCase()) || []);
-    const allUsersList = [
-      ...(admins?.map((u: any) => ({ ...u, role: 'admin', source: 'admin' })) || []),
-      ...(approved?.filter((u: any) => !adminEmails.has(u.email.toLowerCase())).map((u: any) => ({ ...u, source: 'approved' })) || [])
-    ];
-    setAllUsers(allUsersList);
+    const ae = new Set(admins?.map((x: any) => x.email.toLowerCase()) || []);
+    setAllUsers([
+      ...(admins?.map((u: any) => ({ ...u, role: 'admin' })) || []),
+      ...(approved?.filter((u: any) => !ae.has(u.email.toLowerCase())) || [])
+    ]);
   };
 
-  const handleApprove = async (email: string, role: 'viewer' | 'editor') => {
-    await supabase.from('approved_users').upsert([{ email, role, is_active: true, session_token: generateToken(), approved_at: new Date().toISOString() }], { onConflict: 'email' });
-    await supabase.from('pending_users').update({ status: 'approved' }).eq('email', email);
-    await loadPermissions(); await loadAllUsers();
-  };
+  const logout = async () => { await supabase.auth.signOut(); window.location.href = '/'; };
 
-  const handleReject = async (email: string) => {
-    await supabase.from('pending_users').update({ status: 'rejected' }).eq('email', email);
-    await loadPermissions();
-  };
-
-  const handleDeactivateUser = async (email: string) => {
-    await supabase.from('approved_users').update({ is_active: false, session_token: null }).ilike('email', email);
-    await loadPermissions(); await loadAllUsers();
-  };
-
-  const handleAddUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newUserEmail) return;
-    if (newUserRole === 'admin') await supabase.from('admins').upsert({ email: newUserEmail }, { onConflict: 'email' });
-    await supabase.from('approved_users').upsert([{ email: newUserEmail, role: newUserRole, is_active: true, session_token: generateToken(), approved_at: new Date().toISOString() }], { onConflict: 'email' });
-    const { error } = await supabase.auth.signInWithOtp({ email: newUserEmail, options: { shouldCreateUser: true } });
-    if (error) { alert('فشل إرسال الدعوة.'); return; }
-    setNewUserEmail(''); setNewUserRole('viewer'); setShowUserForm(false);
-    await loadAllUsers();
-    alert(`✓ تم إرسال دعوة إلى ${newUserEmail}`);
-  };
-
-  const handleEditUser = async (user: any, newRole: 'viewer' | 'editor' | 'admin') => {
-    if (newRole === 'admin') {
-      await supabase.from('admins').upsert({ email: user.email }, { onConflict: 'email' });
-      await supabase.from('approved_users').upsert([{ email: user.email, role: 'admin', is_active: true, approved_at: new Date().toISOString() }], { onConflict: 'email' });
-    } else {
-      await supabase.from('admins').delete().eq('email', user.email);
-      await supabase.from('approved_users').upsert([{ email: user.email, role: newRole, is_active: true, approved_at: new Date().toISOString() }], { onConflict: 'email' });
-    }
-    setEditingUser(null); await loadAllUsers();
-  };
-
-  const handleDeleteUser = async (user: any) => {
-    if (!window.confirm(t('confirmDeleteUser'))) return;
-    await supabase.from('admins').delete().eq('email', user.email);
-    await supabase.from('approved_users').delete().ilike('email', user.email);
-    await loadAllUsers();
-  };
-
-  const handleLogout = async () => { await supabase.auth.signOut(); window.location.href = '/'; };
-
-  const handleAddClient = async (e: React.FormEvent) => {
+  // Clients
+  const addClient = async (e: React.FormEvent) => {
     e.preventDefault();
     const { data, error } = await supabase.from('clients').insert([{ name: clientName }]).select();
-    if (!error && data) { setClients([data[0], ...clients]); setClientName(''); setShowClientForm(false); }
+    if (!error && data) { setClients([data[0], ...clients]); setClientName(''); setShowClient(false); }
+  };
+  const delClient = async (id: string) => {
+    if (!window.confirm(t('confirmDel'))) return;
+    const { error } = await supabase.from('clients').delete().eq('id', id);
+    if (!error) { setClients(clients.filter(c => c.id !== id)); setAlbums(albums.filter(a => a.client_id !== id)); }
   };
 
-  const handleDeleteClient = async (clientId: string) => {
-    if (window.confirm(t('confirmDeleteClient'))) {
-      const { error } = await supabase.from('clients').delete().eq('id', clientId);
-      if (!error) { setClients(clients.filter(c => c.id !== clientId)); setAlbums(albums.filter(a => a.client_id !== clientId)); }
-    }
-  };
-
-  const handleAddAlbum = async (e: React.FormEvent) => {
+  // Albums
+  const addAlbum = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = generateToken();
-    const { data, error } = await supabase.from('albums').insert([{ name: albumName, description: albumDescription, client_id: selectedClient?.id, is_public: true, share_token: token, session_type: sessionType, session_date: sessionDate || new Date().toISOString() }]).select();
+    const { data, error } = await supabase.from('albums').insert([{
+      name: albumName, description: albumDesc, client_id: selClient || null, is_public: true,
+      share_token: genToken(), session_type: sessionType, session_date: sessionDate || new Date().toISOString()
+    }]).select();
     if (!error && data) {
-      const client = clients.find(c => c.id === selectedClient?.id);
-      const newAlbum = { ...data[0], clients: client ? { name: client.name } : null };
-      setAlbums([newAlbum, ...albums]);
-      setAlbumCounts(prev => ({ ...prev, [newAlbum.id]: 0 }));
-      setAlbumName(''); setAlbumDescription(''); setSessionType('wedding'); setSessionDate('');
-      setShowAlbumForm(false); setSelectedClient(null);
+      const cl = clients.find(c => c.id === selClient);
+      setAlbums([{ ...data[0], clients: cl ? { name: cl.name } : null }, ...albums]);
+      setCounts(p => ({ ...p, [data[0].id]: 0 }));
+      setAlbumName(''); setAlbumDesc(''); setSessionType('wedding'); setSessionDate(''); setSelClient(''); setShowAlbum(false);
     }
   };
-
-  const handleDeleteAlbum = async (albumId: string) => {
-    if (window.confirm(t('confirmDeleteAlbum'))) {
-      const { error } = await supabase.from('albums').delete().eq('id', albumId);
-      if (!error) { setAlbums(albums.filter(a => a.id !== albumId)); loadData(); }
-    }
+  const delAlbum = async (id: string) => {
+    if (!window.confirm(t('confirmDel'))) return;
+    const { error } = await supabase.from('albums').delete().eq('id', id);
+    if (!error) { setAlbums(albums.filter(a => a.id !== id)); loadData(); }
   };
-
-  const triggerFileUpload = (album: any) => { setPendingUploadAlbum(album); fileInputRef.current?.click(); };
-
-  const handleFilesSelected = async (files: FileList | null) => {
-    if (!files || files.length === 0 || !pendingUploadAlbum) return;
-    let albumWithToken = pendingUploadAlbum;
-    if (!albumWithToken.share_token) {
-      const token = generateToken();
-      const { data } = await supabase.from('albums').update({ share_token: token }).eq('id', albumWithToken.id).select().single();
-      if (data) albumWithToken = data;
-    }
-    setManagingAlbum(albumWithToken); setShowManageForm(true); setPendingUploadAlbum(null);
-    const { data } = await supabase.from('media').select('*').eq('album_id', albumWithToken.id).order('created_at', { ascending: false });
-    if (data) setAlbumMedia(data);
-    await uploadFilesDirect(files, albumWithToken);
+  const copyLink = (tok: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/album/${tok}`);
+    setCopied(tok); setTimeout(() => setCopied(null), 2000);
   };
+  const openAlbum = (tok: string) => { if (tok) window.open(`/album/${tok}`, '_blank'); };
 
-  const uploadFilesDirect = async (files: FileList | null, album: any) => {
-    if (!files || files.length === 0 || !album) return;
-    setUploading(true); setUploadProgress(0); setUploadedFiles(0); setUploadComplete(false);
-    const totalFiles = files.length; setTotalUploadFiles(totalFiles);
-    let uploadedCount = 0;
+  // Upload
+  const pickFiles = (al: any) => { pendingAlbum.current = al; fileRef.current?.click(); };
+  const onFiles = async (files: FileList | null) => {
+    const al = pendingAlbum.current;
+    if (!files || files.length === 0 || !al) return;
+    let album = al;
+    if (!album.share_token) {
+      const { data } = await supabase.from('albums').update({ share_token: genToken() }).eq('id', album.id).select().single();
+      if (data) album = data;
+    }
+    setManaging(album); setShowManage(true);
+    const { data: m } = await supabase.from('media').select('*').eq('album_id', album.id).order('created_at', { ascending: false });
+    if (m) setMedia(m);
+    await upload(files, album);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+  const upload = async (files: FileList, album: any) => {
+    setUploading(true); setProgress(0); setUploadedN(0); setUploadDone(false);
+    let n = 0;
     try {
       for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) { uploadedCount++; setUploadedFiles(uploadedCount); setUploadProgress((uploadedCount / totalFiles) * 100); continue; }
-        const formData = new FormData();
-        formData.append('file', file); formData.append('upload_preset', 'lens-upload'); formData.append('cloud_name', 'hcs8l8f1h'); formData.append('api_key', '143232795822287');
-        try {
-          const response = await fetch(`https://api.cloudinary.com/v1_1/hcs8l8f1h/auto/upload`, { method: 'POST', body: formData });
-          const result = await response.json();
-          if (result.secure_url) await supabase.from('media').insert([{ album_id: album.id, url: result.secure_url, type: result.resource_type === 'video' ? 'video' : 'image', cloudinary_public_id: result.public_id }]);
-        } catch (err) { console.error('Upload error:', err); }
-        uploadedCount++; setUploadedFiles(uploadedCount); setUploadProgress((uploadedCount / totalFiles) * 100);
+        const f = files[i];
+        if (f.type.startsWith('image/') || f.type.startsWith('video/')) {
+          const fd = new FormData();
+          fd.append('file', f); fd.append('upload_preset', 'lens-upload');
+          try {
+            const r = await fetch('https://api.cloudinary.com/v1_1/hcs8l8f1h/auto/upload', { method: 'POST', body: fd });
+            const res = await r.json();
+            if (res.secure_url) await supabase.from('media').insert([{
+              album_id: album.id, url: res.secure_url,
+              type: res.resource_type === 'video' ? 'video' : 'image', cloudinary_public_id: res.public_id
+            }]);
+          } catch (err) { console.error('Upload error:', err); }
+        }
+        n++; setUploadedN(n); setProgress((n / files.length) * 100);
       }
-      const { count } = await supabase.from('media').select('*', { count: 'exact', head: true }).eq('album_id', album.id);
-      setAlbumCounts(prev => ({ ...prev, [album.id]: count || 0 }));
-      const { data: mediaData } = await supabase.from('media').select('*').eq('album_id', album.id).order('created_at', { ascending: false });
-      if (mediaData) setAlbumMedia(mediaData);
-      loadData(); setUploadComplete(true);
-    } catch (error) { console.error('Upload error:', error); }
-    finally { setUploading(false); }
+      const { data: m } = await supabase.from('media').select('*').eq('album_id', album.id).order('created_at', { ascending: false });
+      if (m) setMedia(m);
+      await loadData(); setUploadDone(true);
+    } finally { setUploading(false); }
+  };
+  const delMedia = async (id: string) => {
+    if (!window.confirm(t('confirmDel'))) return;
+    await supabase.from('media').delete().eq('id', id);
+    setMedia(media.filter(m => m.id !== id)); loadData();
   };
 
-  const handleDeleteMedia = async (mediaId: string) => {
-    if (!window.confirm(t('confirmDeleteMedia'))) return;
-    await supabase.from('media').delete().eq('id', mediaId);
-    setAlbumMedia(albumMedia.filter(m => m.id !== mediaId)); loadData();
+  // Users
+  const approve = async (em: string, role: 'viewer' | 'editor') => {
+    await supabase.from('approved_users').upsert([{ email: em, role, is_active: true, session_token: genToken(), approved_at: new Date().toISOString() }], { onConflict: 'email' });
+    await supabase.from('pending_users').update({ status: 'approved' }).eq('email', em);
+    await loadPerms(); await loadAllUsers();
+  };
+  const reject = async (em: string) => {
+    await supabase.from('pending_users').update({ status: 'rejected' }).eq('email', em);
+    await loadPerms();
+  };
+  const deactivate = async (em: string) => {
+    await supabase.from('approved_users').update({ is_active: false, session_token: null }).ilike('email', em);
+    await loadPerms(); await loadAllUsers();
+  };
+  const addUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmail) return;
+    if (newRole === 'admin') await supabase.from('admins').upsert({ email: newEmail }, { onConflict: 'email' });
+    await supabase.from('approved_users').upsert([{ email: newEmail, role: newRole, is_active: true, session_token: genToken(), approved_at: new Date().toISOString() }], { onConflict: 'email' });
+    const { error } = await supabase.auth.signInWithOtp({ email: newEmail, options: { shouldCreateUser: true } });
+    if (error) { alert(t('inviteFail')); return; }
+    const sent = newEmail;
+    setNewEmail(''); setNewRole('viewer'); setShowUser(false);
+    await loadAllUsers(); alert(`✓ ${t('invited')} ${sent}`);
+  };
+  const editUser = async (u: any, role: Role) => {
+    if (role === 'admin') await supabase.from('admins').upsert({ email: u.email }, { onConflict: 'email' });
+    else await supabase.from('admins').delete().eq('email', u.email);
+    await supabase.from('approved_users').upsert([{ email: u.email, role, is_active: true, approved_at: new Date().toISOString() }], { onConflict: 'email' });
+    setEditingUser(null); await loadAllUsers();
+  };
+  const delUser = async (u: any) => {
+    if (!window.confirm(t('confirmDel'))) return;
+    await supabase.from('admins').delete().eq('email', u.email);
+    await supabase.from('approved_users').delete().ilike('email', u.email);
+    await loadAllUsers();
   };
 
-  const copyAlbumLink = (shareToken: string) => {
-    const link = `${window.location.origin}/album/${shareToken}`;
-    navigator.clipboard.writeText(link); setCopiedId(shareToken);
-    setTimeout(() => setCopiedId(null), 2000);
+  const totalPhotos = Object.values(counts).reduce((s, c) => s + c, 0);
+  const typeLabel = (x: string) => t(['wedding', 'portrait', 'event'].includes(x) ? x : 'other');
+  const fmtDate = (d: string) => {
+    if (!d) return '';
+    const dt = new Date(d);
+    return dt.toLocaleDateString(rtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
-  const openAlbum = (shareToken: string) => { if (!shareToken) return; window.location.href = `/album/${shareToken}`; };
-
-  const totalPhotos = Object.values(albumCounts).reduce((sum, count) => sum + count, 0);
-
-  const getSessionIcon = (type: string) => {
-    switch(type) { case 'wedding': return ''; case 'portrait': return '👤'; case 'event': return ''; default: return '📷'; }
-  };
-
-  const getSessionTypeLabel = (type: string): string => {
-    const labels: Record<string, string> = { wedding: t('wedding'), portrait: t('portrait'), event: t('event'), other: t('other') };
-    return labels[type] || labels.other;
-  };
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const months = lang === 'ar' ? ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'] : ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-  };
+  const card = { backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' } as const;
+  const muted = { color: 'var(--text-muted)' } as const;
+  const field = { backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' } as const;
+  const goldBtn = { background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))', color: '#1a1206' } as const;
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[var(--accent)] text-lg font-display">Boles Photography</p>
-        </div>
+        <div className="w-14 h-14 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }} />
       </div>
     );
   }
 
-  const navItems: { id: ActiveTab; icon: any; label: string; adminOnly?: boolean }[] = [
+  const nav: { id: Tab; icon: any; label: string }[] = [
     { id: 'home', icon: Home, label: t('home') },
-    { id: 'sessions', icon: Calendar, label: t('mySessions') },
-    { id: 'photos', icon: ImageIcon, label: t('photos') },
-    { id: 'downloads', icon: Download, label: t('downloads') },
-    { id: 'notifications', icon: Bell, label: t('notifications') },
-    { id: 'profile', icon: User, label: t('profile') },
-    { id: 'support', icon: Headphones, label: t('support') },
-    { id: 'permissions', icon: Shield, label: t('permissions'), adminOnly: true },
-    { id: 'users', icon: UserCog, label: t('userManagement'), adminOnly: true },
+    { id: 'clients', icon: Users, label: t('clients') },
+    { id: 'albums', icon: Folder, label: t('albums') },
+    { id: 'permissions', icon: Shield, label: t('permissions') },
+    { id: 'users', icon: UserCog, label: t('users') },
   ];
 
-  return (
-    <div className={`min-h-screen flex ${lang === 'ar' ? 'rtl' : 'ltr'}`} dir={lang === 'ar' ? 'rtl' : 'ltr'} style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
-      
-      {/* Sidebar */}
-      <aside className={`w-72 fixed h-full overflow-y-auto p-6 flex flex-col ${lang === 'ar' ? 'right-0 border-l' : 'left-0 border-r'}`} style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)' }}>
-        <div className="mb-8 text-center">
-          <div className="inline-block">
-            <h1 className="font-script text-5xl text-gold-gradient mb-1">Boles</h1>
-            <p className="text-xs tracking-[0.4em] uppercase" style={{ color: 'var(--text-muted)' }}>PHOTOGRAPHY</p>
-          </div>
+  const AlbumRow = ({ al, full }: { al: any; full?: boolean }) => (
+    <div className="rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center gap-4" style={card}>
+      <div className="relative w-full md:w-44 h-28 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(212,165,116,0.25), var(--bg-secondary))' }}>
+        <Camera className="w-10 h-10" style={{ color: 'var(--accent)', opacity: 0.6 }} />
+        <span className="absolute bottom-2 start-2 glass px-2 py-1 rounded-lg text-xs text-white flex items-center gap-1">
+          <ImageIcon className="w-3 h-3" />{counts[al.id] || 0} {t('photosCount')}
+        </span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-lg font-bold truncate">{al.name}</h3>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm my-1" style={muted}>
+          <span className="flex items-center gap-1"><Calendar className="w-4 h-4" />{fmtDate(al.session_date || al.created_at)}</span>
+          {al.clients?.name && <span className="flex items-center gap-1"><User className="w-4 h-4" />{al.clients.name}</span>}
         </div>
+        <p className="text-sm mb-3" style={muted}>{al.description || typeLabel(al.session_type || 'other')}</p>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => pickFiles(al)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm" style={goldBtn}><Upload className="w-4 h-4" />{t('uploadMedia')}</button>
+          <button onClick={() => copyLink(al.share_token)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm" style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-primary)' }}><Copy className="w-4 h-4" />{copied === al.share_token ? t('copied') : t('copyLink')}</button>
+          <button onClick={() => openAlbum(al.share_token)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm" style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-primary)' }}><ExternalLink className="w-4 h-4" />{t('open')}</button>
+          {full && <button onClick={() => delAlbum(al.id)} className="p-2 rounded-lg" style={muted}><Trash2 className="w-4 h-4" /></button>}
+        </div>
+      </div>
+    </div>
+  );
 
+  const Modal = ({ title, onClose, children, wide }: any) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
+      <div className={`rounded-2xl p-6 w-full ${wide ? 'max-w-2xl max-h-[90vh] overflow-y-auto' : 'max-w-md'}`} style={card}>
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="text-xl font-bold">{title}</h3>
+          <button onClick={onClose} style={muted}><X className="w-5 h-5" /></button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+  const Btns = ({ onCancel }: { onCancel: () => void }) => (
+    <div className="flex gap-3">
+      <button type="button" onClick={onCancel} className="flex-1 px-4 py-3 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-primary)' }}>{t('cancel')}</button>
+      <button type="submit" className="flex-1 px-4 py-3 rounded-xl font-semibold" style={goldBtn}>{t('save')}</button>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen" dir={rtl ? 'rtl' : 'ltr'} style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+      {/* Sidebar */}
+      <aside className="hidden lg:flex w-64 fixed top-0 bottom-0 flex-col p-5 z-30 end-0" style={{ backgroundColor: 'var(--bg-secondary)', borderInlineStart: '1px solid var(--border)' }}>
+        <div className="text-center mb-8 mt-2">
+          <Camera className="w-6 h-6 mx-auto mb-1" style={{ color: 'var(--accent)' }} />
+          <h1 className="font-script text-5xl text-gold-gradient leading-none">Boles</h1>
+          <p className="text-[10px] tracking-[0.35em] mt-1" style={muted}>PHOTOGRAPHY</p>
+        </div>
         <nav className="flex-1 space-y-1">
-          {navItems.filter(item => !item.adminOnly || userRole === 'admin').map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
-                activeTab === item.id ? 'text-white shadow-lg' : 'hover:bg-[var(--bg-hover)]'
-              }`}
-              style={{
-                backgroundColor: activeTab === item.id ? 'var(--accent)' : 'transparent',
-                color: activeTab === item.id ? '#fff' : 'var(--text-secondary)'
-              }}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
-              {item.id === 'notifications' && pendingUsers.length > 0 && (
-                <span className="ml-auto w-2 h-2 bg-red-500 rounded-full"></span>
-              )}
+          {nav.map(n => (
+            <button key={n.id} onClick={() => setTab(n.id)} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors"
+              style={tab === n.id ? goldBtn : { color: 'var(--text-secondary)' }}>
+              <n.icon className="w-5 h-5" /><span className="font-medium">{n.label}</span>
+              {n.id === 'permissions' && pendingUsers.length > 0 && <span className="ms-auto w-2 h-2 rounded-full bg-red-500" />}
             </button>
           ))}
         </nav>
-
-        <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border)' }}>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))' }}>
-              <Camera className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold">Boles Elhamy</p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('photographer')}</p>
-            </div>
-          </div>
-          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all text-sm" style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
-            <LogOut className="w-4 h-4" />
-            <span>{t('logout')}</span>
-          </button>
-        </div>
+        <p className="font-script text-3xl text-gold-gradient text-center my-4">{t('capture')}</p>
       </aside>
 
-      {/* Main Content */}
-      <main className={`flex-1 ${lang === 'ar' ? 'mr-72' : 'ml-72'} overflow-y-auto`}>
-        <header className="sticky top-0 z-40 px-8 py-4 flex items-center justify-between" style={{ backgroundColor: 'var(--bg-primary)', borderBottom: '1px solid var(--border)' }}>
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute top-1/2 -translate-y-1/2" style={{ left: lang === 'ar' ? 'auto' : '12px', right: lang === 'ar' ? '12px' : 'auto', color: 'var(--text-muted)' }} />
-              <input type="text" placeholder={t('search')} className="rounded-lg px-4 py-2 text-sm focus:outline-none w-64" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-primary)', paddingLeft: lang === 'ar' ? '12px' : '36px', paddingRight: lang === 'ar' ? '36px' : '12px' }} />
-            </div>
-          </div>
+      {/* Mobile nav */}
+      <nav className="lg:hidden flex gap-2 overflow-x-auto p-3 sticky top-0 z-40" style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}>
+        {nav.map(n => (
+          <button key={n.id} onClick={() => setTab(n.id)} className="flex items-center gap-2 px-3 py-2 rounded-lg whitespace-nowrap text-sm"
+            style={tab === n.id ? goldBtn : { color: 'var(--text-secondary)' }}>
+            <n.icon className="w-4 h-4" />{n.label}
+          </button>
+        ))}
+      </nav>
+
+      <main className="lg:me-64">
+        <header className="px-5 md:px-8 py-4 flex items-center justify-between sticky top-0 lg:top-0 z-20" style={{ backgroundColor: 'var(--bg-primary)', borderBottom: '1px solid var(--border)' }}>
           <div className="flex items-center gap-3">
-            <button onClick={toggleLang} className="p-2 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
-              <Globe className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={goldBtn}><Camera className="w-5 h-5" /></div>
+            <div><p className="text-sm font-semibold">Boles Elhamy</p><p className="text-xs" style={muted}>{t('photographer')}</p></div>
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setLang(rtl ? 'en' : 'ar')} className="p-2" style={{ color: 'var(--text-secondary)' }}><Globe className="w-5 h-5" /></button>
+            <button onClick={toggleTheme} className="p-2" style={{ color: 'var(--text-secondary)' }}>{theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
+            <button onClick={() => setTab('permissions')} className="p-2 relative" style={{ color: 'var(--text-secondary)' }}>
+              <Bell className="w-5 h-5" />{pendingUsers.length > 0 && <span className="absolute top-1 end-1 w-2 h-2 rounded-full bg-red-500" />}
             </button>
-            <button onClick={toggleTheme} className="p-2 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-            <button className="p-2 rounded-lg transition-colors relative" style={{ color: 'var(--text-secondary)' }}>
-              <Bell className="w-5 h-5" />
-              {pendingUsers.length > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>}
-            </button>
-            <button onClick={handleLogout} className="p-2 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
-              <LogOut className="w-5 h-5" />
-            </button>
+            <button onClick={logout} className="p-2" style={{ color: 'var(--text-secondary)' }}><LogOut className="w-5 h-5" /></button>
           </div>
         </header>
 
-        <div className="p-8">
-          {/* HOME TAB */}
-          {activeTab === 'home' && (
+        <div className="p-5 md:p-8 space-y-8">
+          {tab === 'home' && (
             <>
-              <div className="relative rounded-3xl overflow-hidden mb-8 h-72 animate-fade-in">
-                <img src="/mybackground.png" alt="Hero" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
-                <div className="absolute inset-0 flex items-center p-10">
-                  <div className="max-w-lg">
-                    <h1 className="text-5xl font-bold text-white mb-3 font-display">
-                      {t('welcome')} <span className="text-gold-gradient">{currentUserEmail.split('@')[0]}</span>
-                    </h1>
-                    <p className="text-2xl text-white/80 mb-4">{t('welcomeSub')}</p>
-                    <p className="text-white/60">{t('welcomeDesc')}</p>
-                    <div className="flex gap-2 mt-6">
-                      <div className="w-8 h-1 rounded-full" style={{ backgroundColor: 'var(--accent)' }}></div>
-                      <div className="w-2 h-1 rounded-full bg-white/30"></div>
-                      <div className="w-2 h-1 rounded-full bg-white/30"></div>
+              <section className="relative rounded-3xl overflow-hidden h-60 md:h-72" style={{ background: 'linear-gradient(135deg, #2a1d10, #0a0a0a)' }}>
+                <img src="/hero.jpeg" alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => ((e.currentTarget.style.display = 'none'))} />
+                <div className="absolute inset-0" style={{ background: `linear-gradient(to ${rtl ? 'left' : 'right'}, rgba(0,0,0,0.9), rgba(0,0,0,0.5) 55%, transparent)` }} />
+                <div className="relative h-full flex flex-col justify-center p-6 md:p-10 max-w-xl">
+                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-2">{t('welcome')}</h2>
+                  <p className="text-xl md:text-3xl text-gold-gradient font-semibold mb-3">{t('welcomeSub')}</p>
+                  <p className="text-white/70 text-sm md:text-base">{t('welcomeDesc')}</p>
+                </div>
+              </section>
+
+              <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { icon: Calendar, v: albums.length, l: t('totalSessions') },
+                  { icon: ImageIcon, v: totalPhotos, l: t('totalPhotos') },
+                  { icon: Users, v: clients.length, l: t('totalClients') },
+                ].map((s, i) => (
+                  <div key={i} className="rounded-2xl p-5" style={card}>
+                    <div className="flex items-center justify-between mb-3">
+                      <s.icon className="w-6 h-6" style={{ color: 'var(--accent)' }} /><TrendingUp className="w-4 h-4 text-green-500" />
                     </div>
+                    <p className="text-3xl font-bold">{s.v}</p><p className="text-sm" style={muted}>{s.l}</p>
                   </div>
-                </div>
-                <div className="absolute bottom-6 right-6 text-right">
-                  <p className="font-script text-4xl text-gold-gradient">{t('captureMoments')}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="rounded-2xl p-6 card-hover animate-fade-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(212, 165, 116, 0.15)' }}>
-                      <Calendar className="w-6 h-6" style={{ color: 'var(--accent)' }} />
-                    </div>
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                  </div>
-                  <p className="text-3xl font-bold mb-1">{albums.length}</p>
-                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t('totalSessions')}</p>
-                </div>
-
-                <div className="rounded-2xl p-6 card-hover animate-fade-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', animationDelay: '0.1s' }}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(212, 165, 116, 0.15)' }}>
-                      <ImageIcon className="w-6 h-6" style={{ color: 'var(--accent)' }} />
-                    </div>
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                  </div>
-                  <p className="text-3xl font-bold mb-1">{totalPhotos}</p>
-                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t('totalPhotos')}</p>
-                </div>
-
-                <div className="rounded-2xl p-6 card-hover animate-fade-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', animationDelay: '0.2s' }}>
-                  <div className="p-3 rounded-xl mb-4 inline-block" style={{ backgroundColor: 'rgba(212, 165, 116, 0.15)' }}>
-                    <Download className="w-6 h-6" style={{ color: 'var(--accent)' }} />
-                  </div>
-                  <p className="text-3xl font-bold mb-1">0</p>
-                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t('todayDownloads')}</p>
-                </div>
-
-                <button onClick={() => setActiveTab('sessions')} className="rounded-2xl p-6 text-white shadow-lg animate-fade-in text-left" style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))', animationDelay: '0.3s' }}>
-                  <div className="p-3 rounded-xl mb-4 inline-block bg-white/20">
-                    <Download className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-xl font-bold mb-1">{t('downloadAll')}</p>
-                  <p className="text-sm text-white/80">{t('downloadAllSub')}</p>
+                ))}
+                <button onClick={() => setTab('albums')} className="rounded-2xl p-5 text-start" style={goldBtn}>
+                  <Download className="w-6 h-6 mb-3" /><p className="text-lg font-bold">{t('albums')}</p><p className="text-sm opacity-80">{albums.length} {t('sessions')}</p>
                 </button>
-              </div>
+              </section>
 
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-6">
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold flex items-center gap-2"><Camera className="w-5 h-5" style={{ color: 'var(--accent)' }} />{t('yourSessions')}</h2>
                   <div className="flex items-center gap-3">
-                    <Camera className="w-6 h-6" style={{ color: 'var(--accent)' }} />
-                    <h2 className="text-2xl font-bold">{t('yourSessions')}</h2>
+                    <button onClick={() => setShowAlbum(true)} className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm" style={goldBtn}><Plus className="w-4 h-4" />{t('createAlbum')}</button>
+                    <button onClick={() => setTab('albums')} className="flex items-center gap-1 text-sm" style={{ color: 'var(--accent)' }}>{t('viewAll')}<ChevronLeft className={`w-4 h-4 ${rtl ? '' : 'rotate-180'}`} /></button>
                   </div>
-                  <button onClick={() => setActiveTab('sessions')} className="flex items-center gap-2 transition-colors" style={{ color: 'var(--accent)' }}>
-                    <span>{t('viewAll')}</span>
-                    <ChevronLeft className={`w-4 h-4 ${lang === 'ar' ? 'rotate-180' : ''}`} />
-                  </button>
                 </div>
-
                 <div className="space-y-4">
-                  {albums.slice(0, 3).map((album, idx) => (
-                    <div key={album.id} className="rounded-2xl p-6 card-hover animate-slide-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', animationDelay: `${idx * 0.1}s` }}>
-                      <div className="flex items-center gap-6">
-                        <div className="relative w-48 h-32 rounded-xl overflow-hidden flex-shrink-0">
-                          <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(212,165,116,0.2), var(--bg-card))' }}>
-                            <Camera className="w-12 h-12" style={{ color: 'var(--accent)', opacity: 0.5 }} />
-                          </div>
-                          <div className="absolute bottom-2 left-2 glass px-3 py-1 rounded-lg flex items-center gap-2">
-                            <ImageIcon className="w-4 h-4" style={{ color: 'var(--accent)' }} />
-                            <span className="text-sm text-white">{albumCounts[album.id] || 0} {t('photos_count')}</span>
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-2xl">{getSessionIcon(album.session_type || 'other')}</span>
-                            <h3 className="text-xl font-bold">{album.name}</h3>
-                          </div>
-                          <div className="flex items-center gap-4 text-sm mb-3" style={{ color: 'var(--text-muted)' }}>
-                            <span className="flex items-center gap-1"><Calendar className="w-4 h-4" />{formatDate(album.session_date || album.created_at)}</span>
-                            {album.clients?.name && <span className="flex items-center gap-1"><User className="w-4 h-4" />{album.clients.name}</span>}
-                          </div>
-                          <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>{album.description || getSessionTypeLabel(album.session_type || 'other')}</p>
-                          <button onClick={() => openAlbum(album.share_token)} className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm text-white" style={{ backgroundColor: 'var(--accent)' }}>
-                            <Download className="w-4 h-4" />
-                            <span>{t('downloadPhotos')}</span>
-                          </button>
-                        </div>
-                        <ChevronLeft className={`w-6 h-6 ${lang === 'ar' ? 'rotate-180' : ''}`} style={{ color: 'var(--text-muted)' }} />
-                      </div>
-                    </div>
-                  ))}
-                  {albums.length === 0 && (
-                    <div className="rounded-2xl p-12 text-center" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                      <Camera className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--accent)', opacity: 0.3 }} />
-                      <p className="text-lg mb-4" style={{ color: 'var(--text-muted)' }}>{t('noSessionsYet')}</p>
-                      <button onClick={() => setShowAlbumForm(true)} className="px-6 py-2 rounded-lg text-white transition-all" style={{ backgroundColor: 'var(--accent)' }}>{t('createAlbum')}</button>
-                    </div>
-                  )}
+                  {albums.slice(0, 3).map(al => <AlbumRow key={al.id} al={al} />)}
+                  {albums.length === 0 && <div className="rounded-2xl p-10 text-center" style={card}><p style={muted}>{t('noAlbums')}</p></div>}
                 </div>
-              </div>
+              </section>
 
-              <div className="rounded-2xl p-8" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <div className="flex items-center gap-3 mb-4">
-                      <Camera className="w-8 h-8" style={{ color: 'var(--accent)' }} />
-                      <div>
-                        <h3 className="text-xl font-bold">{t('contactHelp')}</h3>
-                        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t('contactDesc')}</p>
-                      </div>
-                    </div>
-                    <a href="https://wa.me/201225979165" target="_blank" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white transition-all" style={{ backgroundColor: 'var(--accent)' }}>
-                      <MessageCircle className="w-5 h-5" />
-                      <span>{t('contactWhatsapp')}</span>
-                    </a>
-                  </div>
-                  <div className="space-y-3">
-                    <a href="tel:+201225979165" className="flex items-center gap-3 transition-colors" style={{ color: 'var(--text-secondary)' }}>
-                      <Phone className="w-5 h-5" /><span>+20 122 597 9165</span>
-                    </a>
-                    <a href="https://www.instagram.com/boles.photography" target="_blank" className="flex items-center gap-3 transition-colors" style={{ color: 'var(--text-secondary)' }}>
-                      <InstagramIcon className="w-5 h-5" /><span>Instagram</span>
-                    </a>
-                    <a href="https://www.facebook.com/share/1E6Xrgdz27/" target="_blank" className="flex items-center gap-3 transition-colors" style={{ color: 'var(--text-secondary)' }}>
-                      <FacebookIcon className="w-5 h-5" /><span>Facebook</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* SESSIONS TAB */}
-          {activeTab === 'sessions' && (
-            <>
-              <div className="flex items-center justify-between mb-8">
+              <section className="rounded-2xl p-6 grid md:grid-cols-2 gap-6" style={card}>
                 <div>
-                  <h2 className="text-3xl font-bold font-display">{t('yourSessions')}</h2>
-                  <p className="mt-1" style={{ color: 'var(--text-muted)' }}>{albums.length} {lang === 'ar' ? 'جلسة' : 'sessions'}</p>
+                  <h3 className="text-lg font-bold mb-1">{t('help')}</h3>
+                  <p className="text-sm mb-4" style={muted}>{t('helpDesc')}</p>
+                  <a href="https://wa.me/201225979165" target="_blank" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl" style={goldBtn}><MessageCircle className="w-5 h-5" />{t('whatsapp')}</a>
                 </div>
-                <button onClick={() => setShowAlbumForm(true)} className="flex items-center gap-2 px-6 py-3 rounded-xl text-white transition-all" style={{ backgroundColor: 'var(--accent)' }}>
-                  <Plus className="w-5 h-5" /><span>{t('createAlbum')}</span>
-                </button>
-              </div>
-              <div className="space-y-4">
-                {albums.map((album) => (
-                  <div key={album.id} className="rounded-2xl p-6 card-hover" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                    <div className="flex items-center gap-6">
-                      <div className="relative w-48 h-32 rounded-xl overflow-hidden flex-shrink-0">
-                        <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(212,165,116,0.2), var(--bg-card))' }}>
-                          <Camera className="w-12 h-12" style={{ color: 'var(--accent)', opacity: 0.5 }} />
-                        </div>
-                        <div className="absolute bottom-2 left-2 glass px-3 py-1 rounded-lg flex items-center gap-2">
-                          <ImageIcon className="w-4 h-4" style={{ color: 'var(--accent)' }} />
-                          <span className="text-sm text-white">{albumCounts[album.id] || 0} {t('photos_count')}</span>
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-2xl">{getSessionIcon(album.session_type || 'other')}</span>
-                          <h3 className="text-xl font-bold">{album.name}</h3>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm mb-3" style={{ color: 'var(--text-muted)' }}>
-                          <span className="flex items-center gap-1"><Calendar className="w-4 h-4" />{formatDate(album.session_date || album.created_at)}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button onClick={() => triggerFileUpload(album)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm transition-all" style={{ backgroundColor: '#7c3aed' }}>
-                            <Upload className="w-4 h-4" /><span>{t('uploadMedia')}</span>
-                          </button>
-                          <button onClick={() => copyAlbumLink(album.share_token)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm transition-all" style={{ backgroundColor: '#2563eb' }}>
-                            <Copy className="w-4 h-4" /><span>{copiedId === album.share_token ? t('copied') : t('copyLink')}</span>
-                          </button>
-                          <button onClick={() => openAlbum(album.share_token)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm transition-all" style={{ backgroundColor: 'var(--accent)' }}>
-                            <ExternalLink className="w-4 h-4" /><span>{t('open')}</span>
-                          </button>
-                          <button onClick={() => handleDeleteAlbum(album.id)} className="p-2 rounded-lg transition-all" style={{ color: 'var(--text-muted)' }}>
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {albums.length === 0 && (
-                  <div className="rounded-2xl p-12 text-center" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                    <Camera className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--accent)', opacity: 0.3 }} />
-                    <p className="text-lg" style={{ color: 'var(--text-muted)' }}>{t('noSessionsYet')}</p>
-                  </div>
-                )}
-              </div>
+                <div className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
+                  <a href="tel:+201225979165" className="flex items-center gap-3"><Phone className="w-5 h-5" /><span dir="ltr">+20 122 597 9165</span></a>
+                  <a href="https://www.instagram.com/boles.photography" target="_blank" className="flex items-center gap-3"><InstagramIcon className="w-5 h-5" />Instagram</a>
+                  <a href="https://www.facebook.com/share/1E6Xrgdz27/" target="_blank" className="flex items-center gap-3"><FacebookIcon className="w-5 h-5" />Facebook</a>
+                </div>
+              </section>
             </>
           )}
 
-          {/* PHOTOS TAB */}
-          {activeTab === 'photos' && (
+          {tab === 'clients' && (
             <>
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold font-display">{t('photos')}</h2>
-                <p className="mt-1" style={{ color: 'var(--text-muted)' }}>{totalPhotos} {t('photos_count')}</p>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {albums.map(album => (
-                  <div key={album.id} onClick={() => openAlbum(album.share_token)} className="rounded-2xl overflow-hidden cursor-pointer card-hover" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                    <div className="aspect-square flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(212,165,116,0.2), var(--bg-card))' }}>
-                      <Camera className="w-16 h-16" style={{ color: 'var(--accent)', opacity: 0.5 }} />
-                    </div>
-                    <div className="p-4">
-                      <h4 className="font-bold mb-1">{album.name}</h4>
-                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{albumCounts[album.id] || 0} {t('photos_count')}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* DOWNLOADS TAB */}
-          {activeTab === 'downloads' && (
-            <>
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold font-display">{t('downloads')}</h2>
-                <p className="mt-1" style={{ color: 'var(--text-muted)' }}>{t('todayDownloads')}: 0</p>
-              </div>
-              <div className="rounded-2xl p-12 text-center" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                <Download className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--accent)', opacity: 0.3 }} />
-                <p className="text-lg" style={{ color: 'var(--text-muted)' }}>{lang === 'ar' ? 'لا توجد تنزيلات بعد' : 'No downloads yet'}</p>
-              </div>
-            </>
-          )}
-
-          {/* NOTIFICATIONS TAB */}
-          {activeTab === 'notifications' && (
-            <>
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold font-display">{t('notifications')}</h2>
+              <div className="flex items-center justify-between">
+                <div><h2 className="text-2xl font-bold">{t('clients')}</h2><p style={muted}>{clients.length}</p></div>
+                <button onClick={() => setShowClient(true)} className="flex items-center gap-2 px-5 py-3 rounded-xl" style={goldBtn}><Plus className="w-5 h-5" />{t('addClient')}</button>
               </div>
               <div className="space-y-3">
-                {pendingUsers.length === 0 ? (
-                  <div className="rounded-2xl p-12 text-center" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                    <Bell className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--accent)', opacity: 0.3 }} />
-                    <p className="text-lg" style={{ color: 'var(--text-muted)' }}>{lang === 'ar' ? 'لا توجد إشعارات' : 'No notifications'}</p>
-                  </div>
-                ) : pendingUsers.map((request) => (
-                  <div key={request.id} className="rounded-xl p-4 flex items-center justify-between" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                    <div>
-                      <p className="font-semibold">{request.email}</p>
-                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{new Date(request.created_at).toLocaleString()}</p>
-                    </div>
-                    <span className="px-3 py-1 rounded-full text-xs" style={{ backgroundColor: 'rgba(212,165,116,0.2)', color: 'var(--accent)' }}>{lang === 'ar' ? 'معلق' : 'Pending'}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* PROFILE TAB */}
-          {activeTab === 'profile' && (
-            <>
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold font-display">{t('profile')}</h2>
-              </div>
-              <div className="rounded-2xl p-8" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                <div className="flex items-center gap-6 mb-6">
-                  <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))' }}>
-                    <Camera className="w-12 h-12 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold">Boles Elhamy</h3>
-                    <p className="text-lg" style={{ color: 'var(--text-muted)' }}>{currentUserEmail}</p>
-                    <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs text-white" style={{ backgroundColor: 'var(--accent)' }}>{t('admin')}</span>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-hover)' }}>
-                    <Phone className="w-5 h-5" style={{ color: 'var(--accent)' }} />
-                    <span>+20 122 597 9165</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-hover)' }}>
-                    <InstagramIcon className="w-5 h-5" />
-                    <span>@boles.photography</span>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* SUPPORT TAB */}
-          {activeTab === 'support' && (
-            <>
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold font-display">{t('support')}</h2>
-              </div>
-              <div className="rounded-2xl p-8" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <div className="flex items-center gap-3 mb-4">
-                      <Camera className="w-8 h-8" style={{ color: 'var(--accent)' }} />
-                      <div>
-                        <h3 className="text-xl font-bold">{t('contactHelp')}</h3>
-                        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t('contactDesc')}</p>
+                {clients.map(c => {
+                  const ca = albums.filter(a => a.client_id === c.id);
+                  const ph = ca.reduce((s, a) => s + (counts[a.id] || 0), 0);
+                  return (
+                    <div key={c.id} className="rounded-2xl p-4 flex items-center justify-between" style={card}>
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={goldBtn}>{c.name.charAt(0).toUpperCase()}</div>
+                        <div><h4 className="font-semibold">{c.name}</h4><p className="text-sm" style={muted}>{ca.length} {t('sessions')} • {ph} {t('photosCount')}</p></div>
                       </div>
+                      <button onClick={() => delClient(c.id)} className="p-2" style={muted}><Trash2 className="w-5 h-5" /></button>
                     </div>
-                    <a href="https://wa.me/201225979165" target="_blank" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white transition-all" style={{ backgroundColor: 'var(--accent)' }}>
-                      <MessageCircle className="w-5 h-5" /><span>{t('contactWhatsapp')}</span>
-                    </a>
-                  </div>
-                  <div className="space-y-3">
-                    <a href="tel:+201225979165" className="flex items-center gap-3 transition-colors" style={{ color: 'var(--text-secondary)' }}>
-                      <Phone className="w-5 h-5" /><span>+20 122 597 9165</span>
-                    </a>
-                    <a href="https://www.instagram.com/boles.photography" target="_blank" className="flex items-center gap-3 transition-colors" style={{ color: 'var(--text-secondary)' }}>
-                      <InstagramIcon className="w-5 h-5" /><span>Instagram</span>
-                    </a>
-                    <a href="https://www.facebook.com/share/1E6Xrgdz27/" target="_blank" className="flex items-center gap-3 transition-colors" style={{ color: 'var(--text-secondary)' }}>
-                      <FacebookIcon className="w-5 h-5" /><span>Facebook</span>
-                    </a>
-                  </div>
-                </div>
+                  );
+                })}
+                {clients.length === 0 && <div className="rounded-2xl p-10 text-center" style={card}><p style={muted}>{t('noClients')}</p></div>}
               </div>
             </>
           )}
 
-          {/* PERMISSIONS TAB */}
-          {activeTab === 'permissions' && userRole === 'admin' && (
+          {tab === 'albums' && (
             <>
-              <h2 className="text-3xl font-bold font-display mb-8">{t('permissions')}</h2>
-              <div className="rounded-2xl p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                <h3 className="text-xl font-bold mb-4">{t('pendingRequests')} ({pendingUsers.length})</h3>
-                {pendingUsers.length === 0 ? (
-                  <p className="text-center py-8" style={{ color: 'var(--text-muted)' }}>{t('noPendingRequests')}</p>
-                ) : (
+              <div className="flex items-center justify-between">
+                <div><h2 className="text-2xl font-bold">{t('albums')}</h2><p style={muted}>{albums.length} {t('sessions')}</p></div>
+                <button onClick={() => setShowAlbum(true)} className="flex items-center gap-2 px-5 py-3 rounded-xl" style={goldBtn}><Plus className="w-5 h-5" />{t('createAlbum')}</button>
+              </div>
+              <div className="space-y-4">
+                {albums.map(al => <AlbumRow key={al.id} al={al} full />)}
+                {albums.length === 0 && <div className="rounded-2xl p-10 text-center" style={card}><p style={muted}>{t('noAlbums')}</p></div>}
+              </div>
+            </>
+          )}
+
+          {tab === 'permissions' && (
+            <>
+              <h2 className="text-2xl font-bold">{t('permissions')}</h2>
+              <div className="rounded-2xl p-5" style={card}>
+                <h3 className="text-lg font-bold mb-4">{t('pending')} ({pendingUsers.length})</h3>
+                {pendingUsers.length === 0 ? <p className="text-center py-6" style={muted}>{t('noPending')}</p> : (
                   <div className="space-y-3">
-                    {pendingUsers.map((request) => (
-                      <div key={request.id} className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-                        <div><h4 className="font-semibold">{request.email}</h4><p className="text-sm" style={{ color: 'var(--text-muted)' }}>{new Date(request.created_at).toLocaleString()}</p></div>
+                    {pendingUsers.map(r => (
+                      <div key={r.id} className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)' }}>
+                        <div><h4 className="font-semibold">{r.email}</h4><p className="text-sm" style={muted}>{new Date(r.created_at).toLocaleString()}</p></div>
                         <div className="flex gap-2">
-                          <select id={`role-${request.id}`} className="px-3 py-2 rounded-lg text-sm" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
+                          <select id={`role-${r.id}`} className="px-3 py-2 rounded-lg text-sm" style={field}>
                             <option value="viewer">{t('viewer')}</option><option value="editor">{t('editor')}</option>
                           </select>
-                          <button onClick={() => { const role = (document.getElementById(`role-${request.id}`) as HTMLSelectElement).value as 'viewer' | 'editor'; handleApprove(request.email, role); }} className="px-4 py-2 rounded-lg text-sm text-white flex items-center gap-2" style={{ backgroundColor: '#22c55e' }}>
-                            <UserCheck className="w-4 h-4" /> {t('approve')}
-                          </button>
-                          <button onClick={() => handleReject(request.email)} className="px-4 py-2 rounded-lg text-sm text-white flex items-center gap-2" style={{ backgroundColor: 'var(--danger)' }}>
-                            <UserX className="w-4 h-4" /> {t('reject')}
-                          </button>
+                          <button onClick={() => approve(r.email, (document.getElementById(`role-${r.id}`) as HTMLSelectElement).value as 'viewer' | 'editor')} className="px-4 py-2 rounded-lg text-sm text-white flex items-center gap-2" style={{ backgroundColor: '#22c55e' }}><UserCheck className="w-4 h-4" />{t('approve')}</button>
+                          <button onClick={() => reject(r.email)} className="px-4 py-2 rounded-lg text-sm text-white flex items-center gap-2" style={{ backgroundColor: 'var(--danger)' }}><UserX className="w-4 h-4" />{t('reject')}</button>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-              <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                <h3 className="text-xl font-bold mb-4">{t('approvedUsers')} ({approvedUsers.length})</h3>
-                {approvedUsers.length === 0 ? (
-                  <p className="text-center py-8" style={{ color: 'var(--text-muted)' }}>{t('noApprovedUsers')}</p>
-                ) : (
+              <div className="rounded-2xl p-5" style={card}>
+                <h3 className="text-lg font-bold mb-4">{t('approved')} ({approvedUsers.length})</h3>
+                {approvedUsers.length === 0 ? <p className="text-center py-6" style={muted}>{t('noApproved')}</p> : (
                   <div className="space-y-3">
-                    {approvedUsers.map((user) => (
-                      <div key={user.id} className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-                        <div><h4 className="font-semibold">{user.email}</h4><p className="text-sm" style={{ color: 'var(--text-muted)' }}>{new Date(user.approved_at || user.created_at).toLocaleString()}</p></div>
+                    {approvedUsers.map(u => (
+                      <div key={u.id} className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)' }}>
+                        <div><h4 className="font-semibold">{u.email}</h4><p className="text-sm" style={muted}>{new Date(u.approved_at || u.created_at).toLocaleString()}</p></div>
                         <div className="flex items-center gap-3">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'editor' ? 'bg-amber-900/30 text-amber-400' : 'bg-blue-900/30 text-blue-400'}`}>
-                            {user.role === 'editor' ? t('editor') : t('viewer')}
-                          </span>
-                          <button onClick={() => handleDeactivateUser(user.email)} className="p-2 rounded-lg" style={{ color: 'var(--text-muted)' }}>
-                            <LogOut className="w-4 h-4" />
-                          </button>
+                          <span className="px-3 py-1 rounded-full text-xs" style={{ backgroundColor: 'rgba(212,165,116,0.2)', color: 'var(--accent)' }}>{u.role === 'editor' ? t('editor') : u.role === 'admin' ? t('admin') : t('viewer')}</span>
+                          <button onClick={() => deactivate(u.email)} className="p-2" style={muted}><LogOut className="w-4 h-4" /></button>
                         </div>
                       </div>
                     ))}
@@ -893,187 +545,118 @@ export default function DashboardPage() {
             </>
           )}
 
-          {/* USERS TAB */}
-          {activeTab === 'users' && userRole === 'admin' && (
+          {tab === 'users' && (
             <>
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h2 className="text-3xl font-bold font-display">{t('userManagement')}</h2>
-                  <p className="mt-1" style={{ color: 'var(--text-muted)' }}>{allUsers.length} {lang === 'ar' ? 'مستخدم' : 'users'}</p>
-                </div>
-                <button onClick={() => setShowUserForm(true)} className="flex items-center gap-2 px-6 py-3 rounded-xl text-white transition-all" style={{ backgroundColor: 'var(--accent)' }}>
-                  <Plus className="w-5 h-5" /><span>{t('addUser')}</span>
-                </button>
+              <div className="flex items-center justify-between">
+                <div><h2 className="text-2xl font-bold">{t('users')}</h2><p style={muted}>{allUsers.length} {t('user')}</p></div>
+                <button onClick={() => setShowUser(true)} className="flex items-center gap-2 px-5 py-3 rounded-xl" style={goldBtn}><Plus className="w-5 h-5" />{t('addUser')}</button>
               </div>
-              <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                {allUsers.length === 0 ? (
-                  <p className="text-center py-8" style={{ color: 'var(--text-muted)' }}>{t('noUsers')}</p>
-                ) : (
-                  <div className="space-y-3">
-                    {allUsers.map((user) => (
-                      <div key={user.email} className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))' }}>
-                            <span className="text-white font-bold">{user.email.charAt(0).toUpperCase()}</span>
-                          </div>
-                          <div><h4 className="font-semibold">{user.email}</h4><p className="text-sm" style={{ color: 'var(--text-muted)' }}>{new Date(user.created_at || user.approved_at).toLocaleString()}</p></div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          {editingUser?.email === user.email ? (
-                            <>
-                              <select value={editingUser.role} onChange={(e) => setEditingUser({...editingUser, role: e.target.value as 'viewer' | 'editor' | 'admin'})} className="px-3 py-2 rounded-lg text-sm" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
-                                <option value="viewer">{t('viewer')}</option><option value="editor">{t('editor')}</option><option value="admin">{t('admin')}</option>
-                              </select>
-                              <button onClick={() => handleEditUser(user, editingUser.role)} className="px-4 py-2 rounded-lg text-sm text-white flex items-center gap-2" style={{ backgroundColor: '#22c55e' }}>
-                                <Save className="w-4 h-4" /> {t('save')}
-                              </button>
-                              <button onClick={() => setEditingUser(null)} className="px-4 py-2 rounded-lg text-sm" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)' }}>{t('cancel')}</button>
-                            </>
-                          ) : (
-                            <>
-                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'admin' ? 'bg-purple-900/30 text-purple-400' : user.role === 'editor' ? 'bg-amber-900/30 text-amber-400' : 'bg-blue-900/30 text-blue-400'}`}>
-                                {user.role === 'admin' ? t('admin') : user.role === 'editor' ? t('editor') : t('viewer')}
-                              </span>
-                              <button onClick={() => setEditingUser(user)} className="p-2 rounded-lg" style={{ color: 'var(--text-muted)' }}><Edit className="w-4 h-4" /></button>
-                              <button onClick={() => handleDeleteUser(user)} className="p-2 rounded-lg" style={{ color: 'var(--text-muted)' }}><Trash2 className="w-4 h-4" /></button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+              <div className="space-y-3">
+                {allUsers.length === 0 && <div className="rounded-2xl p-10 text-center" style={card}><p style={muted}>{t('noUsers')}</p></div>}
+                {allUsers.map(u => (
+                  <div key={u.email} className="rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3" style={card}>
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold" style={goldBtn}>{u.email.charAt(0).toUpperCase()}</div>
+                      <div><h4 className="font-semibold">{u.email}</h4><p className="text-sm" style={muted}>{new Date(u.created_at || u.approved_at).toLocaleString()}</p></div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {editingUser?.email === u.email ? (
+                        <>
+                          <select value={editingUser.role} onChange={e => setEditingUser({ ...editingUser, role: e.target.value })} className="px-3 py-2 rounded-lg text-sm" style={field}>
+                            <option value="viewer">{t('viewer')}</option><option value="editor">{t('editor')}</option><option value="admin">{t('admin')}</option>
+                          </select>
+                          <button onClick={() => editUser(u, editingUser.role)} className="px-4 py-2 rounded-lg text-sm text-white flex items-center gap-2" style={{ backgroundColor: '#22c55e' }}><Save className="w-4 h-4" />{t('save')}</button>
+                          <button onClick={() => setEditingUser(null)} className="px-4 py-2 rounded-lg text-sm" style={{ backgroundColor: 'var(--bg-hover)' }}>{t('cancel')}</button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="px-3 py-1 rounded-full text-xs" style={{ backgroundColor: 'rgba(212,165,116,0.2)', color: 'var(--accent)' }}>{u.role === 'admin' ? t('admin') : u.role === 'editor' ? t('editor') : t('viewer')}</span>
+                          <button onClick={() => setEditingUser(u)} className="p-2" style={muted}><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => delUser(u)} className="p-2" style={muted}><Trash2 className="w-4 h-4" /></button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
             </>
           )}
         </div>
       </main>
 
-      <input ref={fileInputRef} type="file" className="hidden" multiple accept="image/*,video/*" onChange={(e) => handleFilesSelected(e.target.files)} />
+      <input ref={fileRef} type="file" className="hidden" multiple accept="image/*,video/*" onChange={e => onFiles(e.target.files)} />
 
-      {showClientForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
-          <div className="rounded-2xl p-6 w-full max-w-md animate-fade-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">{t('addClientTitle')}</h3>
-              <button onClick={() => setShowClientForm(false)} style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
-            </div>
-            <form onSubmit={handleAddClient} className="space-y-4">
-              <input type="text" placeholder={t('clientName')} value={clientName} onChange={(e) => setClientName(e.target.value)} className="w-full px-4 py-3 rounded-xl focus:outline-none" style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }} required />
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setShowClientForm(false)} className="flex-1 px-4 py-3 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-primary)' }}>{t('cancel')}</button>
-                <button type="submit" className="flex-1 px-4 py-3 rounded-xl text-white font-semibold" style={{ backgroundColor: 'var(--accent)' }}>{t('save')}</button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {showClient && (
+        <Modal title={t('addClient')} onClose={() => setShowClient(false)}>
+          <form onSubmit={addClient} className="space-y-4">
+            <input value={clientName} onChange={e => setClientName(e.target.value)} placeholder={t('clientName')} className="w-full px-4 py-3 rounded-xl" style={field} required />
+            <Btns onCancel={() => setShowClient(false)} />
+          </form>
+        </Modal>
       )}
 
-      {showAlbumForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
-          <div className="rounded-2xl p-6 w-full max-w-md animate-fade-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">{t('createAlbumTitle')}</h3>
-              <button onClick={() => setShowAlbumForm(false)} style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
-            </div>
-            <form onSubmit={handleAddAlbum} className="space-y-4">
-              <input type="text" placeholder={t('albumName')} value={albumName} onChange={(e) => setAlbumName(e.target.value)} className="w-full px-4 py-3 rounded-xl focus:outline-none" style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }} required />
-              <textarea placeholder={t('description')} value={albumDescription} onChange={(e) => setAlbumDescription(e.target.value)} className="w-full px-4 py-3 rounded-xl focus:outline-none" style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }} rows={3} />
-              <select value={sessionType} onChange={(e) => setSessionType(e.target.value)} className="w-full px-4 py-3 rounded-xl focus:outline-none" style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
-                <option value="wedding">💍 {t('weddingLabel')}</option>
-                <option value="portrait">👤 {t('portraitLabel')}</option>
-                <option value="event">📅 {t('eventLabel')}</option>
-                <option value="other"> {t('otherLabel')}</option>
-              </select>
-              <input type="date" value={sessionDate} onChange={(e) => setSessionDate(e.target.value)} className="w-full px-4 py-3 rounded-xl focus:outline-none" style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }} />
-              <select value={selectedClient?.id || ''} onChange={(e) => setSelectedClient(clients.find(c => c.id === e.target.value) || null)} className="w-full px-4 py-3 rounded-xl focus:outline-none" style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
-                <option value="">{t('selectClient')}</option>
-                {clients.map((client) => (<option key={client.id} value={client.id}>{client.name}</option>))}
-              </select>
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setShowAlbumForm(false)} className="flex-1 px-4 py-3 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-primary)' }}>{t('cancel')}</button>
-                <button type="submit" className="flex-1 px-4 py-3 rounded-xl text-white font-semibold" style={{ backgroundColor: 'var(--accent)' }}>{t('save')}</button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {showAlbum && (
+        <Modal title={t('createAlbum')} onClose={() => setShowAlbum(false)}>
+          <form onSubmit={addAlbum} className="space-y-4">
+            <input value={albumName} onChange={e => setAlbumName(e.target.value)} placeholder={t('albumName')} className="w-full px-4 py-3 rounded-xl" style={field} required />
+            <textarea value={albumDesc} onChange={e => setAlbumDesc(e.target.value)} placeholder={t('description')} rows={3} className="w-full px-4 py-3 rounded-xl" style={field} />
+            <select value={sessionType} onChange={e => setSessionType(e.target.value)} className="w-full px-4 py-3 rounded-xl" style={field}>
+              <option value="wedding">{t('wedding')}</option><option value="portrait">{t('portrait')}</option>
+              <option value="event">{t('event')}</option><option value="other">{t('other')}</option>
+            </select>
+            <input type="date" value={sessionDate} onChange={e => setSessionDate(e.target.value)} className="w-full px-4 py-3 rounded-xl" style={field} />
+            <select value={selClient} onChange={e => setSelClient(e.target.value)} className="w-full px-4 py-3 rounded-xl" style={field}>
+              <option value="">{t('selectClient')}</option>
+              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+            <Btns onCancel={() => setShowAlbum(false)} />
+          </form>
+        </Modal>
       )}
 
-      {showUserForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
-          <div className="rounded-2xl p-6 w-full max-w-md animate-fade-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">{t('addUser')}</h3>
-              <button onClick={() => { setShowUserForm(false); setNewUserEmail(''); setNewUserRole('viewer'); }} style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
-            </div>
-            <form onSubmit={handleAddUser} className="space-y-4">
-              <input type="email" placeholder={t('email')} value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl focus:outline-none" style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }} required />
-              <select value={newUserRole} onChange={(e) => setNewUserRole(e.target.value as 'viewer' | 'editor' | 'admin')} className="w-full px-4 py-3 rounded-xl focus:outline-none" style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
-                <option value="viewer">{t('viewer')}</option><option value="editor">{t('editor')}</option><option value="admin">{t('admin')}</option>
-              </select>
-              <div className="flex gap-3">
-                <button type="button" onClick={() => { setShowUserForm(false); setNewUserEmail(''); setNewUserRole('viewer'); }} className="flex-1 px-4 py-3 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-primary)' }}>{t('cancel')}</button>
-                <button type="submit" className="flex-1 px-4 py-3 rounded-xl text-white font-semibold" style={{ backgroundColor: 'var(--accent)' }}>{t('save')}</button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {showUser && (
+        <Modal title={t('addUser')} onClose={() => setShowUser(false)}>
+          <form onSubmit={addUser} className="space-y-4">
+            <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder={t('email')} className="w-full px-4 py-3 rounded-xl" style={field} required />
+            <select value={newRole} onChange={e => setNewRole(e.target.value as Role)} className="w-full px-4 py-3 rounded-xl" style={field}>
+              <option value="viewer">{t('viewer')}</option><option value="editor">{t('editor')}</option><option value="admin">{t('admin')}</option>
+            </select>
+            <Btns onCancel={() => setShowUser(false)} />
+          </form>
+        </Modal>
       )}
 
-      {showManageForm && managingAlbum && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
-          <div className="rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="text-xl font-bold">{t('uploadMediaTitle')}: {managingAlbum.name}</h3>
-                <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-                  {albumMedia.length} {t('files')}
-                  {uploading && <span className="mr-2" style={{ color: 'var(--accent)' }}>- {t('uploading')} {Math.round(uploadProgress)}%</span>}
-                  {uploadComplete && <span className="mr-2 text-green-500">✓ {t('uploadComplete')}</span>}
-                </p>
+      {showManage && managing && (
+        <Modal wide title={`${t('uploadMedia')}: ${managing.name}`} onClose={() => { setShowManage(false); setManaging(null); setUploadDone(false); }}>
+          <p className="text-sm mb-4" style={muted}>{media.length} {t('files')}{uploading && ` - ${t('uploading')} ${Math.round(progress)}%`}{uploadDone && ` ✓ ${t('uploadComplete')}`}</p>
+          <div className="space-y-3">
+            {media.length === 0 && !uploading ? <p className="text-center py-8" style={muted}>{t('noMedia')}</p> : media.map(m => (
+              <div key={m.id} className="flex items-center gap-4 p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)' }}>
+                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                  {m.type === 'image' ? <img src={m.url} alt="" className="w-full h-full object-cover" /> : <video src={m.url} className="w-full h-full object-cover" />}
+                </div>
+                <div className="flex-1 flex items-center gap-2 text-sm" style={muted}>
+                  {m.type === 'image' ? <FileImage className="w-4 h-4" style={{ color: 'var(--accent)' }} /> : <FileVideo className="w-4 h-4" style={{ color: 'var(--accent)' }} />}
+                  {m.type === 'image' ? t('image') : t('video')}
+                </div>
+                <button onClick={() => delMedia(m.id)} className="p-2" style={muted}><Trash2 className="w-4 h-4" /></button>
               </div>
-              <button onClick={() => { setShowManageForm(false); setManagingAlbum(null); setUploading(false); setUploadComplete(false); }} style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
-            </div>
-            <div className="space-y-3">
-              {albumMedia.length === 0 && !uploading ? <p className="text-center py-8" style={{ color: 'var(--text-muted)' }}>{t('noMedia')}</p> : (
-                albumMedia.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0" style={{ backgroundColor: 'var(--bg-primary)' }}>
-                      {item.type === 'image' ? <img src={item.url} alt="" className="w-full h-full object-cover" /> : <video src={item.url} className="w-full h-full object-cover" />}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        {item.type === 'image' ? <FileImage className="w-4 h-4" style={{ color: 'var(--accent)' }} /> : <FileVideo className="w-4 h-4" style={{ color: 'var(--accent)' }} />}
-                        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{item.type === 'image' ? t('image') : t('video')}</span>
-                      </div>
-                    </div>
-                    <button onClick={() => handleDeleteMedia(item.id)} className="p-2 rounded-lg" style={{ color: 'var(--text-muted)' }}><Trash2 className="w-4 h-4" /></button>
-                  </div>
-                ))
-              )}
-            </div>
+            ))}
           </div>
-        </div>
+        </Modal>
       )}
 
-      {(uploading || uploadComplete) && (
-        <div className={`fixed bottom-6 ${lang === 'ar' ? 'left-6' : 'right-6'} z-50 rounded-2xl p-4 shadow-2xl min-w-[280px] animate-slide-in`} style={{ backgroundColor: uploadComplete ? 'rgba(34,197,94,0.9)' : 'var(--bg-card)', border: `1px solid ${uploadComplete ? '#22c55e' : 'var(--border)'}` }}>
+      {(uploading || uploadDone) && (
+        <div className="fixed bottom-6 start-6 z-[60] rounded-2xl p-4 shadow-2xl min-w-[260px]" style={card}>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
+            <span className="flex items-center gap-2 text-sm font-semibold">
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--accent)' }} /> : <CheckCircle2 className="w-4 h-4 text-green-500" />}
-              <span className="text-sm font-semibold">{uploadComplete ? t('uploadComplete') : t('uploading')}</span>
-            </div>
-            <button onClick={() => { setUploading(false); setUploadComplete(false); setUploadProgress(0); }} style={{ color: 'var(--text-muted)' }}><X className="w-4 h-4" /></button>
+              {uploadDone && !uploading ? t('uploadComplete') : t('uploading')}
+            </span>
+            <button onClick={() => { setUploading(false); setUploadDone(false); }} style={muted}><X className="w-4 h-4" /></button>
           </div>
-          {!uploadComplete && (
-            <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: 'var(--bg-hover)' }}>
-              <div className="h-2 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%`, backgroundColor: 'var(--accent)' }}></div>
-            </div>
-          )}
-          <div className="flex justify-between text-xs">
-            <span style={{ color: 'var(--text-muted)' }}>{t('uploaded')}: <span className="text-green-400 font-bold">{uploadedFiles}</span></span>
-            {!uploadComplete && <span className="font-bold" style={{ color: 'var(--accent)' }}>{Math.round(uploadProgress)}%</span>}
-          </div>
+          {!uploadDone && <div className="w-full rounded-full h-2 mb-2" style={{ backgroundColor: 'var(--bg-hover)' }}><div className="h-2 rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: 'var(--accent)' }} /></div>}
+          <p className="text-xs" style={muted}>{t('uploaded')}: <b className="text-green-500">{uploadedN}</b></p>
         </div>
       )}
     </div>
